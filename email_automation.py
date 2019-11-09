@@ -96,7 +96,11 @@ class Email():
                 for part in email_message.walk():
                     if part.get_content_type() == "text/plain": # ignore attachments/html
                         email_body = part.get_payload(decode = True)
-                self.pending_processing_email.append((email_from, email_subject,
-                                                  email_body.decode('utf8')))
+                d_email = {
+                    'from': email_from,
+                    'subject': email_subject,
+                    'body': email_body.decode('utf8'),
+                }
+                self.pending_processing_email.append(d_email)
         return self.pending_processing_email
 
