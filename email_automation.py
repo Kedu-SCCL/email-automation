@@ -13,16 +13,15 @@ from os.path import exists
 class Email():
 
     def __init__(self, host = None, username = None, password = None,
-                 read_email_db = None, eol = None, acl_from_email_address =
-                 None):
+                 processed_email_db = None, acl_from_email_address = None):
         self.logger = self._setup_logger('odoo', 'stdout')
         self.host = host
         self.username = username
         self.password = password
-        self.read_email_db = read_email_db
-        self.eol = eol
-        self.imap = None
+        self.processed_email_db = processed_email_db
         self.acl_from_email_address = acl_from_email_address
+        self.imap = None
+        self.pending_processing_email = []
 
     def _setup_logger(self, name, log_file, level=INFO):
         # https://stackoverflow.com/a/11233293
@@ -52,8 +51,8 @@ class Email():
         '''
         True if e-mail id is not found in local db
         '''
-        mode = 'r+' if exists(self.read_email_db) else 'w+'
-        with open(self.read_email_db, mode) as fp:
+        mode = 'r+' if exists(self.processed_email_db) else 'w+'
+        with open(self.processed_email_db, mode) as fp:
             for line in fp:
                 if email_id in line:
                     return False
@@ -69,7 +68,7 @@ class Email():
             return False
         return True
 
-    def get_pending_processed_emails(self):
+    def get_pending_processing_emails(self):
         '''
         Returns message in INBOX which are not yet processed
         '''
@@ -97,5 +96,7 @@ class Email():
                 for part in email_message.walk():
                     if part.get_content_type() == "text/plain": # ignore attachments/html
                         email_body = part.get_payload(decode = True)
-                return (email_from, email_subject, email_body.decode('utf8'))
+                self.pending_processing_email.append((email_from, email_subject,
+                                                  email_body.decode('utf8')))
+        return self.pending_processing_email
 

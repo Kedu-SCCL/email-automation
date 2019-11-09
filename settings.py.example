@@ -6,16 +6,13 @@
 host = 'imap.example.com'
 
 # E-mail username
-username = 'user@example.com'
+username = 'destination@example.com'
 
 # b64encoded password for e-mail username
-password = b'b64encodedpassword'
+password = b'b64password'
 
 # Path to file to store read e-mails
-read_email_db = 'read_email.db'
-
-# End Of Line for writing e-mail functions
-eol = '<br>'
+processed_email_db = 'processed_email.db'
 
 # Optional. List of recognized "From:" e-mail addresses
 acl_from_email_address = (
