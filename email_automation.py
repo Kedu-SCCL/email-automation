@@ -96,16 +96,17 @@ class Email():
                     if part.get_content_type() == "text/plain": # ignore attachments/html
                         email_body = part.get_payload(decode = True)
                 d_email = {
+                    'id': email_id,
                     'from': email_from,
                     'subject': email_subject,
                     'body': email_body.decode('utf8'),
                 }
                 self.pending_processing_email.append(d_email)
             elif not self._is_acl_from_email_address(email_from):
-                self._mark_email_as_processed(email_id)
+                self.mark_email_as_processed(email_id)
         return self.pending_processing_email
 
-    def _mark_email_as_processed(self, email_id):
+    def mark_email_as_processed(self, email_id):
         '''
         Stores email id in local database unless already there
         '''
