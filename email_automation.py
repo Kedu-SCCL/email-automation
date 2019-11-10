@@ -56,7 +56,6 @@ class Email():
             for line in fp:
                 if email_id in line:
                     return False
-            fp.write(email_id + '\n')
             return True
 
     def _is_acl_from_email_address(self, email_from):
@@ -102,5 +101,21 @@ class Email():
                     'body': email_body.decode('utf8'),
                 }
                 self.pending_processing_email.append(d_email)
+            elif not self._is_acl_from_email_address(email_from):
+                print('A')
+                print(email_from)
+                self._mark_email_as_processed(email_id)
         return self.pending_processing_email
+
+    def _mark_email_as_processed(self, email_id):
+        '''
+        Stores email id in local database unless already there
+        '''
+        mode = 'r+' if exists(self.processed_email_db) else 'w+'
+        with open(self.processed_email_db, mode) as fp:
+            for line in fp:
+                if email_id in line:
+                    return False
+            fp.write(email_id + '\n')
+
 
