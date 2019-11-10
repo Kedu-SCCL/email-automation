@@ -102,8 +102,6 @@ class Email():
                 }
                 self.pending_processing_email.append(d_email)
             elif not self._is_acl_from_email_address(email_from):
-                print('A')
-                print(email_from)
                 self._mark_email_as_processed(email_id)
         return self.pending_processing_email
 
