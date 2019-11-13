@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+##### Needed by get_pending_processing_emails() ##########
+
 # IMAP server hostname
 # WARNING: if using gmail enable 'less secure apps access'
 # https://support.google.com/accounts/answer/6010255?hl=en
@@ -17,4 +19,20 @@ processed_email_db = 'processed_email.db'
 # Optional. List of recognized "From:" e-mail addresses
 acl_from_email_address = (
 'trusted1@example.com',
+)
+
+##### Needed by send_email() ##########
+
+smtp_server = 'smtp.example.com'
+
+smtp_port = '587'
+
+smtp_user = 'sender@example.com'
+
+# B64encoded
+smtp_password = b'b64encodedpassword' 
+
+l_destination_email = (
+'destination1@example.com',
+'destination2@example.com',
 )

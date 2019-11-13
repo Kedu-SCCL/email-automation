@@ -9,11 +9,16 @@ from base64 import b64decode
 from imaplib import IMAP4_SSL, IMAP4
 from email import message_from_string
 from os.path import exists
+from smtplib import SMTP
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 class Email():
 
     def __init__(self, host = None, username = None, password = None,
-                 processed_email_db = None, acl_from_email_address = None):
+                 processed_email_db = None, acl_from_email_address = None,
+                 smtp_server = None, smtp_port = None, smtp_user = None,
+                 smtp_password = None):
         self.logger = self._setup_logger('odoo', 'stdout')
         self.host = host
         self.username = username
@@ -22,6 +27,10 @@ class Email():
         self.acl_from_email_address = acl_from_email_address
         self.imap = None
         self.pending_processing_email = []
+        self.smtp_server = smtp_server
+        self.smtp_port = smtp_port
+        self.smtp_user = smtp_user
+        self.smtp_password = smtp_password
 
     def _setup_logger(self, name, log_file, level=INFO):
         # https://stackoverflow.com/a/11233293
@@ -115,5 +124,32 @@ class Email():
                 if email_id in line:
                     return False
             fp.write(email_id + '\n')
+
+    def send_email(self, l_destination_email, subject, body):
+        '''
+        Send e-mail to list of destination given subject and body
+        '''
+        with SMTP(self.smtp_server, self.smtp_port) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(self.smtp_user,
+                         b64decode(self.smtp_password).decode('utf8'))
+            for email in l_destination_email:
+                # I need to move this block inside the loop or otherwise
+                # the "message["To"]" is being concatenated
+                message = MIMEMultipart("alternative")
+                message["Subject"] = subject
+                message["From"] = self.smtp_user
+                message["To"] = email
+                part2 = MIMEText(body, "html")
+                message.attach(part2)
+                server.sendmail(
+                    self.smtp_user,
+                    email,
+                    message.as_string(),
+                )
+                self.logger.info('E-mail sent to ' + email)
+
+
 
 
