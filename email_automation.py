@@ -86,6 +86,7 @@ class Email():
         # search and return uids instead
         i = len(data[0].split()) # data[0] is a space separate string
         for x in range(i):
+            body = ''
             latest_email_uid = data[0].split()[x] # unique ids wrt label selected
             result, email_data = self.imap.uid('fetch', latest_email_uid,
                                                '(RFC822)')
@@ -96,19 +97,24 @@ class Email():
             # converts byte literal to string removing b''
             email_message = message_from_string(raw_email_string)
             email_id = email_message['Message-Id']
-            email_from = email_message['From'].split('<',1)[1].split('>')[0]
+
+            # TODO: add a try catch here
+            try:
+                email_from = email_message['From'].split('<',1)[1].split('>')[0]
+            except IndexError as e:
+                email_from = email_message['From']
             if self._is_not_processed(email_id) and\
                self._is_acl_from_email_address(email_from):
                 email_subject = email_message['Subject']
                 # this will loop through all the available multiparts in mail
                 for part in email_message.walk():
                     if part.get_content_type() == "text/plain": # ignore attachments/html
-                        email_body = part.get_payload(decode = True)
+                        body = part.get_payload(decode = True).decode('utf8')
                 d_email = {
                     'id': email_id,
                     'from': email_from,
                     'subject': email_subject,
-                    'body': email_body.decode('utf8'),
+                    'body': body,
                 }
                 self.pending_processing_email.append(d_email)
             self.mark_email_as_processed(email_id)
